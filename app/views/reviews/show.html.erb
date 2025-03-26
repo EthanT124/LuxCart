@@ -1,0 +1,249 @@
+<h1 class="text-center text-blue-400 text-xl py-4"><%= @user.username %>'s Reviews</h1>
+
+<div class="relative overflow-x-auto">
+  <table class="w-full text-md text-left rtl:text-right border border-black">
+    <thead class="text-md border border-black">
+      <tr>
+        <th scope="col" class="px-6 py-3">ID</th>
+        <th scope="col" class="px-6 py-3">Username</th>
+        <th scope="col" class="px-6 py-3">User ID</th>
+        <th scope="col" class="px-6 py-3">Title</th>
+        <th scope="col" class="px-6 py-3">Score</th>
+        <th scope="col" class="px-6 py-3">Description</th>
+        <th scope="col" class="px-6 py-3">Image</th>
+        <th scope="col" class="px-6 py-3">Created At</th>
+        <th scope="col" class="px-6 py-3">Updated At</th>
+        <th scope="col" class="px-6 py-3">Yes</th>
+        <th scope="col" class="px-6 py-3">No</th>
+        <th scope="col" class="px-6 py-3">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @reviews.each do |review| %>
+        <tr class="border border-black" id="review_<%= review.id %>">
+          <td scope="row" class="px-6 py-4"><%= review.id %></td>
+          <td scope="row" class="px-6 py-4"><%= review.username %></td>
+          <td scope="row" class="px-6 py-4"><%= review.user_id %></td>
+          <td scope="row" class="px-6 py-4"><%= review.title %></td>
+          <td scope="row" class="px-6 py-4"><%= review.score %></td>
+          <td scope="row" class="px-6 py-4"><%= review.description %></td>
+          <td class="px-6 py-4">
+            <% if review.images.attached? %>
+              <%= image_tag url_for(review.images.first), class: 'w-16 h-16' %>
+            <% end %>
+          </td>
+          <td scope="row" class="px-6 py-4"><%= review.created_at.strftime("%B %d, %Y %I:%M %p") %></td>
+          <td scope="row" class="px-6 py-4"><%= review.updated_at.strftime("%B %d, %Y %I:%M %p") %></td>
+          <td scope="row" class="px-6 py-4"><%= review.yes %></td>
+          <td scope="row" class="px-6 py-4"><%= review.no %></td>
+          <td class="px-6 py-4">
+            <button class="mb-2 md:mb-0 bg-blue-500 border border-blue-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg" onclick="showEditForm('<%= review.id %>', '<%= review.title %>', '<%= review.description %>', '<%= review.score %>', <%= review.images.map { |img| rails_blob_path(img, only_path: true) }.to_json %>)">Edit</button>
+            <button class="mb-2 md:mb-0 bg-red-500 border border-red-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg" onclick="showDeleteForm('<%= review.id %>', '<%= review.title %>')">Delete</button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <% if @reviews.count > 10 %>
+    <div class="text-center py-5">
+      <%== pagy_nav(@pagy) %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Hidden Edit Form Modal -->
+<div id="editFormModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+  <div class="relative top-20 mx-auto p-5 border w-full max-w-lg h-auto shadow-lg rounded-md bg-white">
+    <%= form_with(model: @review || Review.new, local: true, html: { multipart: true }) do |form| %>
+      <div class="mb-4">
+        <%= form.label :title, "Title", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :title, id: "editTitle", name: "review[title]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :description, "Description", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_area :description, id: "editDescription", name: "review[description]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :score, "Score", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :score, id: "editScore", name: "review[score]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :images, "Images", class: "py-4 block text-gray-700 font-bold mb-2" %>
+        <div id="editImagesContainer"></div>
+        <%= form.file_field :images, id: "editImages", name: "review[images][]", multiple: true, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div class="mb-4 py-4">
+        <%= form.submit "Update", class: "mb-2 md:mb-0 bg-blue-500 border border-blue-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg" %>
+      </div>
+    <% end %>
+    <button onclick="closeEditForm()" class="mb-2 md:mb-0 bg-gray-500 border border-gray-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg">Close</button>
+  </div>
+</div>
+
+<!-- Hidden Delete Form Modal -->
+<div id="deleteModal" class="hidden min-w-screen h-screen animated fadeIn faster fixed left-0 top-0 flex justify-center items-center inset-0 z-50 outline-none focus:outline-none bg-no-repeat bg-center bg-cover">
+  <div class="absolute bg-black opacity-80 inset-0 z-0"></div>
+  <div class="w-full max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg bg-white">
+    <div class="">
+      <div class="text-center p-5 flex-auto justify-center">
+        <h2 class="text-xl font-bold py-4">Are you sure?</h2>
+        <h2>id:</h2> <p id="reviewID"></p>
+        <h3 id="title"></h3>
+        <p class="text-sm text-gray-500 px-8">Do you really want to delete the following review? This process cannot be undone</p>
+      </div>
+      <div class="p-3 mt-2 text-center space-x-4 md:block">
+        <button onclick="cancelReview()" class="mb-2 md:mb-0 bg-white px-5 py-2 text-sm shadow-sm font-medium tracking-wider border text-gray-600 rounded-full hover:shadow-lg hover:bg-gray-100">
+          Cancel
+        </button>
+        <button class="mb-2 md:mb-0 bg-red-500 border border-red-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg hover:bg-red-600" onclick="deleteReview()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+  function showEditForm(id, title, description, score, imagePaths) {
+    // Ensure the modal and form elements exist
+    var editFormModal = document.getElementById('editFormModal');
+    var editTitle = document.getElementById('editTitle');
+    var editDescription = document.getElementById('editDescription');
+    var editScore = document.getElementById('editScore');
+    var editImagesContainer = document.getElementById('editImagesContainer');
+
+    if (!editFormModal) {
+      console.error('Element not found: editFormModal');
+      return;
+    }
+    if (!editTitle) {
+      console.error('Element not found: editTitle');
+      return;
+    }
+    if (!editDescription) {
+      console.error('Element not found: editDescription');
+      return;
+    }
+    if (!editScore) {
+      console.error('Element not found: editScore');
+      return;
+    }
+    if (!editImagesContainer) {
+      console.error('Element not found: editImagesContainer');
+      return;
+    }
+
+    // Set form values
+    editTitle.value = title;
+    editDescription.value = description;
+    editScore.value = score;
+
+    // Set image paths
+    editImagesContainer.innerHTML = '';
+    if (Array.isArray(imagePaths) && imagePaths.length > 0) {
+      imagePaths.forEach(function(path) {
+        var imgDiv = document.createElement('div');
+        imgDiv.className = 'relative inline-block';
+
+        var img = document.createElement('img');
+        img.src = path;
+        img.className = 'w-16 h-16';
+        imgDiv.appendChild(img);
+
+        var deleteBtn = document.createElement('button');
+        deleteBtn.className = 'absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center';
+        deleteBtn.innerHTML = '&times;';
+        deleteBtn.onclick = function() {
+          imgDiv.remove();
+        };
+        imgDiv.appendChild(deleteBtn);
+
+        editImagesContainer.appendChild(imgDiv);
+      });
+    }
+
+    // Set form action URL
+    var form = document.querySelector('#editFormModal form');
+    form.action = `/reviews/${id}`;
+    form.method = 'POST';
+
+    // Remove existing hidden inputs if any
+    var existingMethodInput = form.querySelector('input[name="_method"]');
+    if (existingMethodInput) {
+      existingMethodInput.remove();
+    }
+    var existingCsrfInput = form.querySelector('input[name="authenticity_token"]');
+    if (existingCsrfInput) {
+      existingCsrfInput.remove();
+    }
+
+    // Add hidden method input for PUT
+    var methodInput = document.createElement('input');
+    methodInput.setAttribute('type', 'hidden');
+    methodInput.setAttribute('name', '_method');
+    methodInput.setAttribute('value', 'put');
+    form.appendChild(methodInput);
+
+    // Add hidden CSRF token input
+    var csrfInput = document.createElement('input');
+    csrfInput.setAttribute('type', 'hidden');
+    csrfInput.setAttribute('name', 'authenticity_token');
+    csrfInput.setAttribute('value', csrfToken);
+    form.appendChild(csrfInput);
+
+    // Show the form
+    editFormModal.classList.remove('hidden');
+  }
+
+  function closeEditForm() {
+    document.getElementById('editFormModal').classList.add('hidden');
+  }
+
+  function showDeleteForm(id, title) {
+    document.getElementById("deleteModal").classList.remove('hidden');
+    document.getElementById("title").innerHTML = title;
+    document.getElementById('reviewID').innerHTML = id;
+  }
+
+  function cancelReview() {
+    document.getElementById("deleteModal").classList.add('hidden');
+  }
+
+  function deleteReview() {
+    var reviewId = document.getElementById('reviewID').innerHTML;
+    var url = `/reviews/${reviewId}`;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': csrfToken,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        document.getElementById(`review_${reviewId}`).remove();
+        document.getElementById("deleteModal").classList.add('hidden');
+        // refresh the page
+        location.reload();
+      } else {
+        return response.json().then(error => {
+          console.error('Delete failed:', error);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Request failed:', error);
+    });
+  }
+
+  // Expose functions to global scope
+  window.showEditForm = showEditForm;
+  window.closeEditForm = closeEditForm;
+  window.showDeleteForm = showDeleteForm;
+  window.cancelReview = cancelReview;
+  window.deleteReview = deleteReview;
+});
+</script>

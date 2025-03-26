@@ -1,0 +1,98 @@
+# Logs
+/log/*.log
+!/log/.keep
+
+# Temporary files and cache
+/tmp
+!/tmp/.keep
+
+# PID files and restart scripts
+/tmp/pids
+/tmp/pids/*.pid
+/tmp/pids/*.state
+/tmp/sockets
+!/tmp/sockets/.keep
+
+# Yarn integrity file
+/yarn.lock
+
+# Ignore bundler config
+/.bundle
+
+# Rails secrets
+/config/master.key
+/config/credentials.yml.enc
+
+# Environment variables
+.env
+
+# Node modules
+/node_modules
+
+# Coverage reports
+/coverage/
+
+# Uploaded files
+/storage/*
+!/storage/.keep
+
+# Bundler path
+/vendor/bundle
+
+# SQLite database files
+*.sqlite3
+*.sqlite3-journal
+
+# Byebug command history
+.byebug_history
+
+# Ignore the database schema if you have multiple developers
+/db/schema.rb
+/db/structure.sql
+
+# Ignore files from specific editors
+*.swp
+*.swo
+*~
+
+# macOS-specific files
+.DS_Store
+
+# Windows-specific files
+Thumbs.db
+desktop.ini
+
+# System-generated backups
+*.bak
+*.orig
+
+# Other IDE-specific files
+.idea/
+.vscode/
+*.iml
+
+# Debugging files
+*.stackdump
+
+# Temporary files created by editors
+*.tmp
+*.temp
+
+# Compiled files
+*.o
+*.out
+*.class
+
+# Logs and reports
+*.log
+*.report
+
+# Other system files
+*.lock
+*.cache
+*.gz
+*.zip
+*.tar
+*.tgz
+*.rar
+*.7z

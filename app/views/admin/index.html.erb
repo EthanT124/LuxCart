@@ -1,0 +1,69 @@
+<h1 class="text-center text-4xl mb-8">Welcome to the Admin Portal, <%=@current_user.username%></h1>
+
+
+
+
+<div class="grid grid-cols-3 gap-8">
+    <div class="flex flex-col items-center">
+        <h2 class="text-4xl px-6 font-bold py-3 text-center">Inventory Management</h2>
+        <div class="space-y-4 text-center">
+            <a href="/admin/new_item">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Create New Item
+                </button>
+            </a>
+            <a href="/admin/manage_items">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Manage Items
+                </button>
+            </a>
+            <a href="/admin/manage_orders">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Update Orders
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+        <h2 class="text-4xl px-6 font-bold py-3 text-center">User Management</h2>
+        <div class="space-y-4 text-center">
+            <a href="/admin/notifications">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Send New Notification
+                </button>
+            </a>
+            <a href="/admin/admins">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Manage User Status
+                </button>
+            </a>
+            <a href="/admin/activities">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Activity Log
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+        <h2 class="text-4xl px-6 font-bold py-3 text-center">Admin Specific</h2>
+        <div class="space-y-4 text-center">
+            <a href="/admin/notifications">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Send New Notification
+                </button>
+            </a>
+            <a href="/admin/admins">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Manage User Status
+                </button>
+            </a>
+            <a href="/admin/notifications">
+                <button class="w-full text-black text-2xl font-bold border border-gray-500 rounded-xl py-6 px-6 shadow-xl hover:bg-gray-100">
+                    Manage Notifications
+                </button>
+            </a>
+        </div>
+    </div>
+</div>

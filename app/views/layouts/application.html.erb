@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Luxcart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload', 'data-turbo' => false %>
+  <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag 'application', 'data-turbolinks-track': 'reload' %>
+  <%= javascript_importmap_tags %>
+  
+
+  <%= favicon_link_tag 'LuxCart.png', rel: 'icon', type: 'image/png' %>
+
+</head>
+<script>
+  // app/assets/javascripts/cart.js
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+  
+  function createCartCookie() {
+    let cart = {
+      ids: [],
+      qty: {},
+      costs: {},
+      savings: {},
+      total: 0
+    };
+    let cartString = JSON.stringify(cart);
+    let date = new Date();
+    date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); 
+    let expires = "; expires=" + date.toUTCString();
+    document.cookie = "cart=" + cartString + expires + "; path=/";
+  }
+  
+  function addToCart(ID, cost, savings = 0) {
+    if (getCookie('cart') == "") {
+      createCartCookie();
+    }
+  
+    let cart = JSON.parse(getCookie('cart'));
+  
+    if (!cart.ids.includes(ID)) {
+      cart.ids.push(ID);
+      cart.qty[ID] = 1;
+      cart.costs[ID] = cost;
+      cart.savings[ID] = savings;
+    } else {
+      cart.qty[ID]++;
+    }
+  
+    cart.total += (cost - savings);
+    cart.total = Math.round(cart.total * 100) / 100; // Round to 2 decimal places
+  
+    let cartString = JSON.stringify(cart);
+    let date = new Date();
+    date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); 
+    let expires = "; expires=" + date.toUTCString();
+    document.cookie = "cart=" + cartString + expires + "; path=/";
+  
+    window.location.reload();
+  }
+  
+  function updateCartTotal() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let total = 0;
+  
+    cart.forEach(item => {
+      total += (item.cost - (item.cost * (item.discount / 100)));
+    });
+  
+    total = total.toFixed(2); // Round to 2 decimal places
+    document.getElementById('cart-total').innerText = `$${total}`;
+  }
+  
+  window.onload = function() {
+    updateCartTotal();
+  };
+    function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  function getCookieInfo() {
+    if (getCookie('cart') != "") {
+      let cookieValue = getCookie('cart');
+      
+      // Parse the JSON of the cookie
+      let newJSON = JSON.parse(cookieValue);  
+      let ids = newJSON["ids"]
+      let count = ids.length;
+      document.getElementById('qty').innerHTML = count;
+    } else {
+      document.getElementById('qty').innerHTML = 0;
+    }
+  }
+
+  function updateCart(ID, qtyPassedIn, status) {
+    console.log('The ID passed in is ' + ID);
+    console.log('The Quantity passed in is ' + qtyPassedIn);
+    console.log('The status of whether its an increment or decrement is ' + status);
+    
+    // Obtain the cookie
+    let newJSON = JSON.parse(getCookie('cart'));  
+
+    // Obtain the quantity section of the cookie
+    let qty = newJSON['qty'];
+
+    // Basically, if the quantity is 0, remove it
+    if (qtyPassedIn <= 0) {
+      // Call the remove function
+      remove(ID);
+
+      // Refresh the page
+      window.location.reload();
+    }
+
+    // Obtain the value of the costs
+    let cost = newJSON["costs"];
+      
+    // Update the total price
+    let total = newJSON["total"];
+    
+    // Handle savings
+    let savings = newJSON["savings"];
+    let savingsAmount = savings ? savings[ID + ''] : 0;
+
+    // If it's Incrementing
+    if (status) {
+      let costOfItem = cost[ID + ''];
+      let curqty = qty[ID + ''];
+      let qtyDif = qtyPassedIn - curqty;
+      curqty += qtyDif;
+      total += (costOfItem - savingsAmount) * qtyDif;
+      total = Math.round(total * 100) / 100; // Round to 2 decimal places
+      console.log(qtyDif);
+      qty['' + ID] = curqty;
+      
+      newJSON['total'] = total;
+      newJSON['qty'] = qty;
+    } else if (!status) {
+      let costOfItem = cost[ID + ''];
+      let curqty = qty[ID + ''];
+      let qtyDif = curqty - qtyPassedIn;
+      curqty -= qtyDif;
+      console.log('the current quantity is ' + curqty);
+      console.log('The quantity difference is ' + curqty + ' Minus ' + qtyPassedIn + ' To Equal ' + qtyDif)
+      total -= (costOfItem - savingsAmount) * qtyDif;
+      total = Math.round(total * 100) / 100; // Round to 2 decimal places
+      console.log(qtyDif);
+      qty['' + ID] = curqty;
+      
+      newJSON['total'] = total;
+      newJSON['qty'] = qty;
+
+      if (curqty <= 0) {
+        remove(ID);
+      }
+    }
+
+    let myCartString = JSON.stringify(newJSON);
+    let date = new Date();
+    date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); 
+    let expires = "; expires=" + date.toUTCString();
+    document.cookie = "cart=" + myCartString + expires + "; path=/";
+    window.location.reload();
+  }
+
+  function remove(id) {
+    let newJSON = JSON.parse(getCookie('cart'));  
+    let newIDS = newJSON["ids"];
+    let cost = newJSON['costs'];
+    let savings = newJSON['savings'];
+    newIDS = newIDS.filter(ID => ID !== id);
+    newJSON["ids"] = newIDS;
+    let total = newJSON["total"];
+    total -= (cost[id + ''] - (savings ? savings[id + ''] : 0));
+    total = Math.round(total * 100) / 100; // Round to 2 decimal places
+    newJSON["total"] = total;
+    let myCartString = JSON.stringify(newJSON);
+    if (newIDS.length <= 0) {
+      document.cookie = "cart=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC"; 
+      window.location.reload();
+    } else {
+      let date = new Date();
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); 
+      let expires = "; expires=" + date.toUTCString();
+      document.cookie = "cart=" + myCartString + expires + "; path=/";
+      window.location.reload();
+    }
+  }
+
+  function decrement(ID) {
+    let newJSON = JSON.parse(getCookie('cart'));  
+    let qty = newJSON['qty'];
+    let qtyValue = qty[ID + ''];
+    qtyValue--;
+    updateCart(ID, qtyValue, false);  
+  }
+
+  function increment(ID) {
+    let newJSON = JSON.parse(getCookie('cart'));  
+    let qty = newJSON['qty'];
+    let qtyValue = qty[ID + ''];
+    qtyValue++;
+    updateCart(ID, qtyValue, true);
+  }
+
+  function handleQtyChange(ID) {
+    let stringtest = 'counter-input' + ID;
+    let qty = document.getElementById(stringtest).value;
+    let newJSON = JSON.parse(getCookie('cart'));  
+    let qtys = newJSON['qty'];
+    let difference = qty - qtys[ID + ''];
+    if (difference >= 0) {
+      updateCart(ID, qty, true);
+    } else {
+      updateCart(ID, qty, false);
+    }
+  }
+
+  
+</script>
+<body class="align-items-center" data-user-logged-in="<%= user_signed_in? %>">
+  <div class="dark">
+    <nav class="bg-white border-gray-200 dark:bg-gray-900">
+      <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">LuxCart</span>
+        </a>
+        <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
+          <span class="sr-only">Open main menu</span>
+          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+          </svg>
+        </button>
+        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+          <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            <li>
+              <%= form_with url: items_path, method: :get, local: true, class: "max-w-md mx-auto" do %>
+                <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                <div class="flex gap-4">
+                  <%= text_field_tag :search, params[:search], id: "default-search", class: "flex-grow w-3/4 block p-2 ps-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500", placeholder: "Enter an item here", required: true %>
+                  <%= submit_tag "Search", class: "w-1/4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" %>
+                </div>
+              <% end %>
+            </li>
+            <li>
+              <a href="/" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white " aria-current="page">Home</a>
+            </li>
+            <li>
+              <a href="/About" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white " aria-current="page">About</a>
+            </li>
+            <li>
+              <a href="/shop" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Shop</a>
+            </li>
+            <li>
+              <a href="/contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Customer Service</a>
+            </li>
+            <li class="relative"> 
+              <p id="qty" class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 text-red-600 bg-white rounded-full border-2 border-red-600">10</p>
+              <%= link_to "Cart", cart_path, class: "block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" %>
+            </li>
+            <% if user_signed_in? %>
+              <% if current_user.admin? %>
+                <li>
+                  <%= link_to "Admin Portal", admin_path, class: "block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" %>
+                </li>
+              <% end %>
+              <li>
+                <!-- app/views/layouts/application.html.erb -->
+                <%= button_to 'Logout', destroy_user_session_path, method: :delete, data: { turbo: false }, class: "text-white" %>
+              </li>
+            <li>
+              <a href="<%= user_path(current_user) %>" class="flex items-center relative">
+                <img class="w-5 h-5 rounded-full" src="https://thumbs.dreamstime.com/b/icon-profile-not-circle-background-color-black-white-194697178.jpg" alt="">
+                <span class="ml-2 py-2 px-3 text-gray-900 rounded md:bg-transparent md:p-0 dark:text-white">
+                  <%= current_user.username %>
+                </span>
+                <% if @notifications_count.to_i > 0 %>
+                  <span class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 text-red-600 bg-white rounded-full border-2 border-red-600">
+                    <%= @notifications_count %>!
+                  </span>
+                <% end %>
+              </a>
+            </li>
+            <% else %>
+              <li>
+                <%= link_to 'Sign in', new_user_session_path, class: 'text-white' %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="flex-grow">
+    <div class="container mx-auto px-4 py-8 h-full">
+      <div class="w-full bg-white p-8 rounded-lg shadow-md border-l-4 border-r-4 border-gray-300 h-full flex flex-col">
+        <%= yield %>
+      </div>
+    </div>
+  </div>
+  
+<footer class="bg-gray-200 py-4 text-center">
+    <div class="flex justify-center space-x-4">
+        <p class="text-gray-700">© 2024 LuxCart. All rights reserved.</p>
+        <a href="/privacy-policy" class="text-gray-700 hover:text-blue-500">Privacy Policy</a>
+        <a href="/terms-of-service" class="text-gray-700 hover:text-blue-500">Terms of Service</a>
+    </div>
+</footer>
+
+  <!-- External JS Libraries -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function getCookieInfo() {
+      if (getCookie('cart') != "") {
+        let cookieValue = getCookie('cart');
+        
+        // Parse the JSON of the cookie
+        let newJSON = JSON.parse(cookieValue);  
+        let ids = newJSON["ids"]
+        let count = ids.length;
+        document.getElementById('qty').innerHTML = count;
+      } else {
+        document.getElementById('qty').innerHTML = 0;
+      }
+    }
+
+    window.onload = getCookieInfo;
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<% if current_user.id == @order.user_id %>
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+        <h1 class="text-2xl font-bold mb-4">Order Details - #<%=@order.id%></h1>
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold">Customer Information</h2>
+            <p><strong>Name:</strong> <%= @order.first_name %> <%= @order.last_name %></p>
+            <p><strong>Phone:</strong> <%= @order.phone_number %></p>
+            <p><strong>Email:</strong> <%= @order.email_address %></p>
+            <p><strong>Address:</strong> <%= @order.address %>, <%= @order.city %>, <%= @order.province %>, <%= @order.country %>, <%= @order.postal_code %></p>
+            <p><strong>Billing Address:</strong> <%= @order.billing_address %></p>
+        </div>
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold">Order Information</h2>
+            <p><strong>Date Ordered:</strong> <%= @order.date_ordered.present? ? @order.date_ordered.strftime("%B %d, %Y") : "N/A" %></p>
+            <p><strong>Delivery Date:</strong> <%= @order.delivery_date.present? ? @order.delivery_date.strftime("%B %d, %Y") : "N/A" %></p>
+            <p><strong>Shipping Method:</strong> <%= @order.shipping_method %></p>
+            <p><strong>Payment Method:</strong> <%= @order.payment_method %></p>
+            <p><strong>Payment Status:</strong> <%= @order.payment_status  || 'Not available'%></p>
+            <p><strong>Order Status:</strong> <%= @order.order_status %></p>
+            <p><strong>Customer Notes:</strong> <%= @order.customer_notes %></p>
+        </div>
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold">Order Summary</h2>
+            <p><strong>Total:</strong> $<%= @order.total %></p>
+            <p><strong>Tax:</strong> $<%= @order.tax %></p>
+            <p><strong>Discount:</strong> $<%= @order.discount %></p>
+            <p><strong>Shipping Cost:</strong> $<%= @order.shipping_cost || '0.0'%></p>
+        </div>
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold">Items Ordered</h2>
+            <ul>
+                <% @order.items.each_with_index do |item, index| %>
+                    <li><strong>Item:</strong> <%= @items[index].title %><%= @order.qty[item] %></li>
+                <% end %>
+
+            </ul>
+        </div>
+    </div>
+<% else %>
+    <% redirect_to root_path, alert: "You are not authorized to view this order." %>
+<% end %>

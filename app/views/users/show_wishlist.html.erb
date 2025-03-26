@@ -1,0 +1,198 @@
+<!-- Showing Wishlist Items -->
+<section class="bg-white dark:bg-gray-900 py-8">
+  <div class="text-center">
+    <% if @wishlist.empty? %>
+      <h1 class="text-4xl text-blue-800 py-5">Your Wishlist is Empty!</h1>
+    <% else %>
+      <h1 class="text-4xl text-blue-800 py-5"><%= current_user.username %>'s wishlist (<%= @wishlist_count %>)</h1>
+    <% end %>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <% @wishlist.each do |item| %>
+      <div class="lg:grid lg:grid-cols-2 lg:gap-8 mb-8 relative">
+        <!-- Image Display -->
+        <!-- Image Display -->
+        <div class="max-w-md lg:max-w-lg mx-auto relative">
+          <%= image_tag item.paths[0], class: 'w-full h-64 object-cover rounded-lg shadow-lg' %>
+        </div>
+
+        <!-- Item Details -->
+        <div class="mt-6 lg:mt-0 space-y-6 relative">
+          <button onclick="removeFromWishlist(<%= item.id %>)" class="absolute top-0 right-0 mt-2 mr-2 text-red-500 hover:text-red-700 flex items-center">
+            <span class="mr-1">Remove From Wishlist</span>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+          <h1 class="text-2xl py-4 font-bold text-gray-900 dark:text-white"><%= item.title %></h1>
+          <div class="flex items-center gap-4">
+            <% if item.discount > 0 %>
+              <p class="text-3xl font-bold text-red-500">
+                $<%= (item.cost * (1 - item.discount / 100.0)).round(2) %>
+                <span class="text-sm text-red-500">(<%= item.discount %>% off)</span>
+              </p>
+              <p class="text-lg text-gray-500 line-through">$<%= item.cost %></p>
+            <% else %>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">$<%= item.cost %></p>
+            <% end %>
+            <!-- Review Information -->
+          <div id="review" class="text-center">
+            <div class="flex justify-center items-center gap-2">
+              <div class="flex items-center">
+                <% (1..5).each do |i| %>
+                  <svg class="w-5 h-5 <%= i <= item.average_rating ? 'text-yellow-400' : 'text-gray-300' %>"
+                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                  </svg>
+                <% end %>
+              </div>
+              <span class="ml-2 text-gray-700 dark:text-gray-300">(<%= item.average_rating %>)</span>
+              <a href="/shop/<%= item.id %>#reviews" class="text-sm text-gray-600 hover:underline ml-2"><%= item.total_reviews %> reviews</a>
+            </div>
+          </div>
+          </div>
+          <p class="text-gray-600 dark:text-gray-400"><%= item.description %></p>
+          <div class="flex items-center gap-4">
+            <button class="bg-blue-800 text-white w-30 h-15 text-center rounded-lg py-1 px-3 shadow hover:bg-blue-500" onclick="cart(<%= item.cost %>, '<%= item.title %>', '<%= item.description %>', <%= item.id %>, <%= item.discount %>)">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4 border-gray-300 dark:border-gray-700">
+    <% end %>
+  </div>
+  <%if @wishlist_count >= 5%>
+    <div class="text-center py-5">
+      <%== pagy_nav(@pagy) %>
+    </div>
+
+  <%end%>
+</section>
+
+<script>
+  function removeFromWishlist(id) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`/wishlist/remove/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      alert('Item removed from wishlist');
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to remove item from wishlist');
+    });
+  }
+
+  function cart(price, name, description, ID, discount) {
+    let discountedPrice = discount > 0 ? (price * (1 - discount / 100.0)).toFixed(2) : price;
+
+    if (getCookie('cart') != "") {
+      let cookieValue = getCookie('cart');
+      let newJSON = JSON.parse(cookieValue);  
+      let newIDS = newJSON["ids"];
+      newIDS.push(ID);
+      newJSON["ids"] = newIDS;
+      let newTotal = newJSON["total"];
+      newTotal += parseFloat(discountedPrice);
+      newJSON["total"] = newTotal;
+      let qty = newJSON["qty"];
+      if (!qty[ID]) {
+        qty[ID] = 1;
+      } else {
+        qty[ID]++;
+      }
+      let costs = newJSON["costs"];
+      costs[ID] = (costs[ID] || 0) + parseFloat(discountedPrice);
+      newJSON["qty"] = qty;
+      newJSON["costs"] = costs;
+      let savings = newJSON["savings"] || {};
+      savings[ID] = (savings[ID] || 0) + (price - parseFloat(discountedPrice));
+      newJSON["savings"] = savings;
+      let myCartString = JSON.stringify(newJSON);
+      let date = new Date();
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+      expires = "; path=/; expires=" + date.toUTCString();
+      document.cookie = "cart=" + myCartString + ';' + expires + ';';
+      console.log(myCartString);
+      window.alert('Added item to cart');
+      window.location.reload();
+    } else {
+      let IDs = [];
+      IDs.push(ID);
+      let myCart = {
+        total: parseFloat(discountedPrice),
+        ids: IDs,
+        qty: {
+          [ID]: 1,
+        },
+        costs: {
+          [ID]: parseFloat(discountedPrice),
+        },
+        savings: {
+          [ID]: price - parseFloat(discountedPrice),
+        }
+      }
+      let myCartString = JSON.stringify(myCart);
+      let date = new Date();
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+      expires = "; path=/; expires=" + date.toUTCString();
+      document.cookie = "cart=" + myCartString + ';' + expires + ';';
+      console.log(myCartString);
+      window.alert('Added item to cart');
+      window.location.reload();
+    }
+  }
+
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+</script>
+<style>
+    .pagy-nav .page {
+      padding: 12px 24px; /* Increase button size */
+      font-size: 1.125rem; /* Font size (lg equivalent) */
+      border-radius: 0.5rem; /* Rounded corners */
+  }
+
+  .pagy-nav .page:hover {
+      background-color: #e2e8f0; /* Light gray for hover */
+  }
+
+  .pagy-nav .active {
+      background-color: #3182ce; /* Tailwind blue */
+      color: white;
+  }
+
+  .line-through {
+      text-decoration: line-through;
+      text-decoration-color: black;
+      text-decoration-thickness: 2px;
+      text-decoration-style: solid;
+  }
+
+</style>

@@ -1,0 +1,235 @@
+<h1 class="text-center text-blue-400 text-xl py-4">Inventory Management</h1>
+
+<div class="relative overflow-x-auto">
+  <table class="w-full text-md text-left rtl:text-right border border-black">
+    <thead class="text-md border border-black">
+      <tr>
+        <th scope="col" class="px-6 py-3">ID</th>
+        <th scope="col" class="px-6 py-3">Name</th>
+        <th scope="col" class="px-6 py-3">Description</th>
+        <th scope="col" class="px-6 py-3">Price</th>
+        <th scope="col" class="px-6 py-3">Image</th>
+        <th scope="col" class="px-6 py-3">Published</th>
+        <th scope="col" class="px-6 py-3">Edit</th>
+        <th scope="col" class="px-6 py-3">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @items.each do |item| %>
+        <tr class="border border-black">
+          <td scope="row" class="px-6 py-4"><%= item.id %></td>
+          <td scope="row" class="px-6 py-4 font-medium"><%= item.title %></td>
+          <td class="px-6 py-4"><%= item.description %></td>
+          <td class="px-6 py-4"><%= item.cost %></td>
+          <td class="px-6 py-4">
+            <% if item.images.attached? %>
+              <%= image_tag url_for(item.images.first), class: 'w-16 h-16' %>
+            <% end %>
+          </td>
+          <td class="px-6 py-4"><%= item.published %></td>
+          <td class="px-6 py-4">
+            <button class="mb-2 md:mb-0 bg-blue-500 border border-blue-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg" onclick="showEditForm('<%= item.id %>', '<%= item.title %>', '<%= item.description %>', '<%= item.cost %>', '<%= item.sku %>',  '<%= item.quantity %>',  '<%= item.category %>', '<%= item.weight %>', '<%= item.discount %>', '<%= item.published %>', <%= item.images.map { |img| rails_blob_path(img, only_path: true) }.to_json %>)">Edit</button>
+          </td>
+          <td class="px-6 py-4">
+            <button class="mb-2 md:mb-0 bg-red-500 border border-red-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg" onclick="showDeleteForm('<%= item.id %>',  '<%= item.title %>')">Delete</button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <div class="text-center py-5">
+  <%== pagy_nav(@pagy) %>
+</div>
+</div>
+
+<!-- Hidden Edit Form Modal -->
+<div id="editFormModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+  <div class="relative top-20 mx-auto p-5 border w-full max-w-lg h-auto shadow-lg rounded-md bg-white">
+    <%= form_with(model: @item, local: true, html: { multipart: true }) do |form| %>
+      <div class="mb-4">
+        <%= form.label :title, "Title", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :title, id: "editTitle", name: "item[title]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :description, "Description", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_area :description, id: "editDescription", name: "item[description]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :cost, "Cost", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :cost, id: "editCost", name: "item[cost]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :sku, "SKU", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :sku, id: "editSku", name: "item[sku]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :quantity, "Quantity", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :quantity, id: "editQuantity", name: "item[quantity]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :category, "Category", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :category, id: "editCategory", name: "item[category]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :weight, "Weight", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :weight, id: "editWeight", name: "item[weight]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :discount, "Discount", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :discount, id: "editDiscount", name: "item[discount]", class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :published, "Published", class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.check_box :published, id: "editPublished", name: "item[published]", class: "shadow appearance-none border rounded w-4 h-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div>
+        <%= form.label :images, "Images", class: "py-4 block text-gray-700 font-bold mb-2" %>
+        <div id="editImagesContainer"></div>
+        <%= form.file_field :images, id: "editImages", name: "item[images][]", multiple: true, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+      </div>
+      <div class="mb-4 py-4">
+        <%= form.submit "Update", class: "mb-2 md:mb-0 bg-blue-500 border border-blue-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg" %>
+      </div>
+    <% end %>
+    <button onclick="closeEditForm()" class="mb-2 md:mb-0 bg-gray-500 border border-gray-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg">Close</button>
+  </div>
+</div>
+
+<div id="deleteModal" class="hidden min-w-screen h-screen animated fadeIn faster fixed left-0 top-0 flex justify-center items-center inset-0 z-50 outline-none focus:outline-none bg-no-repeat bg-center bg-cover">
+  <div class="absolute bg-black opacity-80 inset-0 z-0"></div>
+  <div class="w-full max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg bg-white">
+    <div class="">
+      <div class="text-center p-5 flex-auto justify-center">
+        <h2 class="text-xl font-bold py-4">Are you sure?</h2>
+        <h2>id:</h2> <p id="itemID"></p>
+        <h3 id="title"></h3>
+        <p class="text-sm text-gray-500 px-8">Do you really want to delete the following item? This process cannot be undone</p>
+      </div>
+      <div class="p-3 mt-2 text-center space-x-4 md:block">
+        <button onclick="cancelItem()" class="mb-2 md:mb-0 bg-white px-5 py-2 text-sm shadow-sm font-medium tracking-wider border text-gray-600 rounded-full hover:shadow-lg hover:bg-gray-100">
+          Cancel
+        </button>
+        <button class="mb-2 md:mb-0 bg-red-500 border border-red-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg hover:bg-red-600" onclick="deleteItem()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showEditForm(id, title, description, cost, sku, quantity, category, weight, discount, published, imagePaths) {
+    // Set form values
+    document.getElementById('editTitle').value = title;
+    document.getElementById('editDescription').value = description;
+    document.getElementById('editCost').value = cost;
+    document.getElementById('editSku').value = sku;
+    document.getElementById('editQuantity').value = quantity;
+    document.getElementById('editCategory').value = category;
+    document.getElementById('editWeight').value = weight;
+    document.getElementById('editDiscount').value = discount;
+    document.getElementById('editPublished').checked = (published === 'true');
+
+    // Set image paths
+    var imagesContainer = document.getElementById('editImagesContainer');
+    imagesContainer.innerHTML = '';
+    if (imagePaths.length > 0) {
+      var imgDiv = document.createElement('div');
+      imgDiv.className = 'relative inline-block';
+
+      var img = document.createElement('img');
+      img.src = imagePaths[0];
+      img.className = 'w-16 h-16';
+      imgDiv.appendChild(img);
+
+      var deleteBtn = document.createElement('button');
+      deleteBtn.className = 'absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center';
+      deleteBtn.innerHTML = '&times;';
+      deleteBtn.onclick = function() {
+        imgDiv.remove();
+      };
+      imgDiv.appendChild(deleteBtn);
+
+      imagesContainer.appendChild(imgDiv);
+    }
+
+    // Set form action URL
+    var form = document.querySelector('#editFormModal form');
+    form.action = `/admin/items/${id}`;
+    form.method = 'POST';
+
+    // Add hidden method input for PUT
+    var methodInput = document.createElement('input');
+    methodInput.setAttribute('type', 'hidden');
+    methodInput.setAttribute('name', '_method');
+    methodInput.setAttribute('value', 'put');
+    form.appendChild(methodInput);
+
+    // Show the form
+    document.getElementById('editFormModal').classList.remove('hidden');
+  }
+
+  function closeEditForm() {
+    document.getElementById('editFormModal').classList.add('hidden');
+  }
+
+  function showDeleteForm(id, title) {
+    document.getElementById("deleteModal").classList.remove('hidden');
+    document.getElementById("title").innerHTML = title;
+    document.getElementById('itemID').innerHTML = id;
+  }
+
+  function cancelItem() {
+    document.getElementById("deleteModal").classList.add('hidden');
+  }
+
+  function deleteItem() {
+    var itemId = document.getElementById('itemID').innerHTML;
+    var url = `/admin/items/${itemId}`;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        document.getElementById(`item_${itemId}`).remove();
+        document.getElementById("deleteModal").classList.add('hidden');
+        window.location.refresh();
+      } else {
+        return response.json().then(error => {
+          console.error('Delete failed:', error);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Request failed:', error);
+    });
+  }
+</script>
+<style>
+    .pagy-nav .page {
+      padding: 12px 24px; /* Increase button size */
+      font-size: 1.125rem; /* Font size (lg equivalent) */
+      border-radius: 0.5rem; /* Rounded corners */
+  }
+
+  .pagy-nav .page:hover {
+      background-color: #e2e8f0; /* Light gray for hover */
+  }
+
+  .pagy-nav .active {
+      background-color: #3182ce; /* Tailwind blue */
+      color: white;
+  }
+
+  .line-through {
+      text-decoration: line-through;
+      text-decoration-color: black;
+      text-decoration-thickness: 2px;
+      text-decoration-style: solid;
+  }
+
+</style>

@@ -1,0 +1,144 @@
+<div class="text-center">
+  <div class="border-b-2">
+    <h1 class="text-center text-4xl font-bold py-6">Welcome to LuxCart, your one-stop shop for all your needs!</h1>
+    <p class="text-xl">LuxCart is a local Saskatoon-based E-Commerce site ran via Ruby on Rails</p>
+    <p class="text-xl py-5">We offer a wide variety of products, from electronics to clothing to home goods</p>
+    <% if @discount_items %>
+      <div>
+        <h1 class="text-3xl font-bold py-3">Items On Sale</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 justify-center">
+          <% @discount_items.each do |item| %>
+            <% if item.published %>
+              <div id="<%= item.id %>" data-category="<%= item.category %>" class="flex flex-col m-4 rounded-lg shadow">
+                <a href="/shop/<%= item.id %>" class="flex flex-col flex-grow justify-between">
+                  <div class="px-3 py-3">
+                    <h1 class="text-lg font-semibold py-3 px-2 text-center" id="title<%= item.id %>"><%= item.title %></h1>
+                    <div class="flex justify-center items-center">
+                      <% if item.paths.present? %>
+                        <%= image_tag item.paths[0], class: 'w-48 h-48 object-cover mb-4 py-3' %>
+                      <% end %>
+                    </div>
+                    <div class="text-center py-3">
+                      <% if item.discount > 0 %>
+                        <p class="text-2xl font-bold text-red-500">
+                          $<%= number_with_precision(item.cost * (1 - item.discount / 100.0), precision: 2) %>
+                          <span class="text-sm text-red-500">(<%= item.discount %>% off)</span>
+                        </p>
+                        <p class="text-lg text-gray-500 line-through">$<%= number_with_precision(item.cost, precision: 2) %></p>
+                      <% else %>
+                        <p class="text-2xl font-bold">$<%= number_with_precision(item.cost, precision: 2) %></p>
+                      <% end %>
+                    </div>
+                  <div id="review" class="text-center">
+                    <div class="flex flex-col items-center justify-center gap-y-1">
+                      <div class="flex items-center gap-x-1">
+                        <% (1..5).each do |i| %>
+                          <svg class="w-5 h-5 <%= i <= item.average_rating ? 'text-yellow-400' : 'text-gray-300' %>"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                          </svg>
+                        <% end %>
+                      </div>
+                      <span class="text-gray-700 dark:text-gray-300">(<%= item.average_rating %>)</span>
+                      <a href="/shop/<%= item.id %>#reviews" class="text-sm text-gray-600 hover:underline"><%= item.total_reviews %> reviews</a>
+                    </div>
+                  </div>
+
+                  </div>
+                </a>
+                <div class="flex justify-center py-2">
+                  <button class="bg-blue-800 text-white w-30 h-15 text-center rounded-lg py-1 px-3 shadow hover:bg-blue-500" onclick="cart(<%= item.cost %>, '<%= j item.title %>', '<%= j item.description %>', <%= item.id %>, <%= item.discount %>)">Add to Cart</button>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+        <% if @discount_items.size > 4 %>
+          <div class="text-center py-5">
+            <%== pagy_nav(@pagy) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    <% if @review_items %>
+      <div>
+        <h1 class="text-3xl font-bold py-4">Well Reviewed Items</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 justify-center">
+          <% @review_items.each do |item| %>
+            <% if item.published %>
+              <div id="<%= item.id %>" data-category="<%= item.category %>" class="flex flex-col m-4 rounded-lg shadow">
+                <a href="/shop/<%= item.id %>" class="flex flex-col flex-grow justify-between">
+                  <div class="px-3 py-3">
+                    <h1 class="text-lg font-semibold py-3 px-2 text-center" id="title<%= item.id %>"><%= item.title %></h1>
+                    <div class="flex justify-center items-center">
+                      <% if item.paths.present? %>
+                        <%= image_tag item.paths[0], class: 'w-48 h-48 object-cover mb-4 py-3' %>
+                      <% end %>
+                    </div>
+                    <div class="text-center py-3">
+                      <% if item.discount > 0 %>
+                        <p class="text-2xl font-bold text-red-500">
+                          $<%= number_with_precision(item.cost * (1 - item.discount / 100.0), precision: 2) %>
+                          <span class="text-sm text-red-500">(<%= item.discount %>% off)</span>
+                        </p>
+                        <p class="text-lg text-gray-500 line-through">$<%= number_with_precision(item.cost, precision: 2) %></p>
+                      <% else %>
+                        <p class="text-2xl font-bold">$<%= number_with_precision(item.cost, precision: 2) %></p>
+                      <% end %>
+                    </div>
+                <div id="review" class="text-center">
+                  <div class="flex flex-col items-center justify-center gap-y-1">
+                    <div class="flex items-center gap-x-1">
+                      <% (1..5).each do |i| %>
+                        <svg class="w-5 h-5 <%= i <= item.average_rating ? 'text-yellow-400' : 'text-gray-300' %>"
+                          xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                        </svg>
+                      <% end %>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300">(<%= item.average_rating %>)</span>
+                    <a href="/shop/<%= item.id %>#reviews" class="text-sm text-gray-600 hover:underline"><%= item.total_reviews %> reviews</a>
+                  </div>
+                </div>
+
+                  </div>
+                </a>
+                <div class="flex justify-center py-2">
+                  <button class="bg-blue-800 text-white w-30 h-15 text-center rounded-lg py-1 px-3 shadow hover:bg-blue-500" onclick="cart(<%= item.cost %>, '<%= j item.title %>', '<%= j item.description %>', <%= item.id %>, <%= item.discount %>)">Add to Cart</button>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+        <% if @review_items.size > 4 %>
+          <div class="text-center py-5">
+            <%== pagy_nav(@pagy) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+<style>
+  .pagy-nav .page {
+    padding: 12px 24px;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+  }
+
+  .pagy-nav .page:hover {
+    background-color: #e2e8f0;
+  }
+
+  .pagy-nav .active {
+    background-color: #3182ce;
+    color: white;
+  }
+
+  .line-through {
+    text-decoration: line-through;
+    text-decoration-color: black;
+    text-decoration-thickness: 2px;
+    text-decoration-style: solid;
+  }
+</style>

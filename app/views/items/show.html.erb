@@ -1,0 +1,475 @@
+<!-- Showing an Item -->
+<section class="bg-white dark:bg-gray-900 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+      <!-- Image Display -->
+      <div class="max-w-md lg:max-w-lg mx-auto">
+        <%= image_tag @item.paths[0], class: 'w-full rounded-lg shadow-lg' %>
+      </div>
+
+      <!-- Item Details -->
+      <div class="mt-6 lg:mt-0 space-y-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= @item.title %></h1>
+        <div class="flex items-center gap-4">
+          <% if @item.discount > 0 %>
+            <p class="text-3xl font-bold text-red-500">
+              $<%= (@item.cost * (1 - @item.discount / 100.0)).round(2) %>
+              <span class="text-sm text-red-500">(<%= @item.discount %>% off)</span>
+            </p>
+            <p class="text-lg text-gray-500 line-through">$<%= @item.cost %></p>
+          <% else %>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">$<%= @item.cost %></p>
+          <% end %>
+          <div class="flex items-center gap-2">
+            <div class="flex">
+              <% (1..5).each do |i| %>
+                <svg class="w-5 h-5 <%= i <= @average_rating ? 'text-yellow-400' : 'text-gray-300' %>"
+                  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                </svg>
+              <% end %>
+              <span class="ml-2">(<%= @average_rating %>)</span>
+            </div>
+            <a href="#reviews" class="text-sm text-gray-600 hover:underline"><%= @total_reviews %> reviews</a>
+      <%if current_user%>
+        <% if current_user.wishlist.include?(@item.id) %>
+          <!-- Fully colored heart icon -->
+          <button onclick="removeFromWishlist(<%=@item.id%>)"class="text-red-500" title="Remove from wishlist" data-action="remove">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" stroke="none">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </button>
+        <% else %>
+          <!-- Outline heart icon -->
+          <button onclick="addToWishlist(<%=@item.id%>)"class="text-gray-500 hover:text-red-500" title="Add to wishlist" data-action="add">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.682l1.318-1.364a4.5 4.5 0 116.364 6.364l-7.682 7.682a.75.75 0 01-1.06 0L4.318 12.682a4.5 4.5 0 010-6.364z" />
+            </svg>
+          </button>
+        <% end %>
+      <%end%>
+
+          </div>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-400"><%= @item.description %></p>
+        <div class="flex items-center gap-4">
+          <% if current_user %>
+            <button onclick="handleReview()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              Leave a Review
+            </button>
+          <% end %>
+          <button class="bg-blue-800 text-white w-30 h-15 text-center rounded-lg py-1 px-3 shadow hover:bg-blue-500" onclick="cart(<%= @item.cost %>, '<%= @item.title %>', '<%= @item.description %>', <%= @item.id %>, <%= @item.discount %>)">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Review Modal -->
+<div id="crud-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-2xl">
+    <div class="p-6">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Create a Review</h2>
+        <button onclick="hideModal()" class="text-gray-600 dark:text-gray-400 hover:text-gray-900">
+          <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <!-- Modal Body -->
+      <form action="/reviews" method="POST" enctype="multipart/form-data" class="space-y-6 mt-4">
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        <%= hidden_field_tag 'review[item_id]', @item.id %>
+        <%= hidden_field_tag 'review[user_id]', current_user.id if current_user %>
+
+        <!-- Username -->
+        <div>
+          <label for="review_username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Name</label>
+          <%= text_field_tag 'review[username]', current_user&.username || '', class: 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white' %>
+        </div>
+
+        <!-- Title -->
+        <div>
+          <label for="review_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Review Title</label>
+          <%= text_field_tag 'review[title]', '', class: 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white', placeholder: 'Enter a title for your review' %>
+        </div>
+
+        <!-- Rating -->
+        <div>
+          <label for="review_score" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Rating</label>
+          <%= select_tag 'review[score]', options_for_select((1..5).map { |n| [n, n] }), class: 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white' %>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="review_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Review</label>
+          <%= text_area_tag 'review[description]', '', rows: 5, class: 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white', placeholder: 'Write your review here...' %>
+        </div>
+
+        <!-- Images -->
+        <div>
+          <label for="review_images" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Images</label>
+          <%= file_field_tag 'review[images][]', multiple: true, class: 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white' %>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Reviews Section -->
+<section class="bg-gray-100 dark:bg-gray-800 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Reviews</h2>
+    <div class="space-y-6">
+      <% @reviews.each do |review| %>
+        <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><%= review.title %></h3>
+              <% if review.date.present? %>
+                <p class="text-sm text-gray-600 dark:text-gray-400">by <%= review.username %> on <%= review.date.strftime("%B %d, %Y") %></p>
+              <% else %>
+                <p class="text-sm text-gray-600 dark:text-gray-400">by <%= review.username %></p>
+              <% end %>
+            </div>
+            <div class="flex items-center">
+              <% (1..5).each do |i| %>
+                <svg class="w-5 h-5 <%= i <= review.score ? 'text-yellow-400' : 'text-gray-300' %>"
+                  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+          <p class="mt-4 text-gray-600 dark:text-gray-400"><%= review.description %></p>
+          <% if review.images.attached? %>
+            <div class="mt-4 grid grid-cols-2 gap-4">
+              <% review.images.each do |image| %>
+                <%= image_tag image, class: 'w-full h-48 object-cover rounded-lg shadow-lg' %>
+              <% end %>
+            </div>
+          <% end %>
+          <div class="flex items-center mt-4">
+            Was this review helpful?
+            <button onclick="yes(<%=review.id%>)"class="pl-3 flex items-center text-gray-600 hover:text-green-500">
+              <img src="https://media.istockphoto.com/id/930887456/vector/thumbs-up-vector-line-icon.jpg?s=612x612&w=0&k=20&c=sfhYzqG1EMZ91fZmpiqsnMSbkPTbQJ8r3D6KcaF_v-A=" class="w-20 h-20 mr-1" alt="Thumbs Up">
+              <span><%=review.yes%></span>
+            </button>
+            <button  onclick="no(<%=review.id%>)" class="flex items-center text-gray-600 hover:text-red-500 ml-4">
+              <img src="https://media.istockphoto.com/id/1456527662/vector/thumbs-down-icon-with-reflection-on-white-background.jpg?s=612x612&w=0&k=20&c=Vg4OYR3zV5xkTG0fnPCt0H7smGKzBIq8fdgh4yLWI4Y=" class="w-10 h-10 mr-1" alt="Thumbs Down">
+              <span><%=review.no%></span>
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="mt-6">
+      <%== pagy_nav(@pagy) if @pagy %>
+    </div>
+  </div>
+</section>
+
+<script>
+  function handleReview() {
+    document.getElementById('crud-modal').classList.remove('hidden');
+  }
+
+  function hideModal() {
+    document.getElementById("crud-modal").classList.add("hidden");
+  }
+
+  function removeFromWishlist(id) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`/wishlist/remove/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      // refresh
+      alert('Item removed from wishlist');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to remove item from wishlist');
+    });
+  }
+
+  function addToWishlist(id) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`/wishlist/add/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      // refresh
+     
+      if (data.message === 'Item is already in the wishlist') {
+        alert('Item is already in your wishlist');
+      } else {
+        alert('Item added to wishlist');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to add item to wishlist');
+    });
+  }
+
+  /*
+  * Function for getting the cookie name
+  * cname - The name of the cookie
+  */
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  /*
+  * This is my function for handling my cart
+  * price - the price of the current item
+  * name - the name of the current item
+  * description - the desc of the current item
+  * ID - The ID of the current item
+  * discount - The discount of the current item
+  */
+  function cart(price, name, description, ID, discount) {
+    // Calculate the discounted price
+    let discountedPrice = discount > 0 ? (price * (1 - discount / 100.0)).toFixed(2) : price;
+
+    // If the cart item exists
+    if (getCookie('cart') != "") {
+      
+      // Get the cookie information
+      let cookieValue = getCookie('cart');
+
+      // Parse the JSON of the cookie
+      let newJSON = JSON.parse(cookieValue);  
+
+      /*
+      * Section - ID Filtration and Addition
+      */
+      // Obtain the array of IDs
+      let newIDS = newJSON["ids"];
+
+      // Add the new ID of the current Item
+      newIDS.push(ID);
+
+      // Update the ID array in the original JSON cookie 
+      newJSON["ids"] = newIDS;
+
+      /*
+      * Section - Updating the Total Price
+      */
+      // Obtain the total
+      let newTotal = newJSON["total"];
+
+      // Add the price to the total
+      newTotal += parseFloat(discountedPrice);
+
+      // Re-assign the total to the JSON Object
+      newJSON["total"] = newTotal;
+
+      /*
+      * Section - Update the Quantity
+      */ 
+      // Get all quantity values
+      let qty = newJSON["qty"];
+      
+      // Dynamically update or add the quantity for the item
+      if (!qty[ID]) {
+        qty[ID] = 1; // Initialize quantity to 1 if the item is not already in the cart
+      } else {
+        qty[ID]++; // Increment the quantity if the item is already in the cart
+      }
+
+      /*
+      * Section - Update the Individual Price
+      */
+      // Obtain the costs object
+      let costs = newJSON["costs"];
+
+      // Update the price for the specific item
+      costs[ID] = (costs[ID] || 0) + parseFloat(discountedPrice);
+
+      // Re-assign the updated qty and costs
+      newJSON["qty"] = qty;
+      newJSON["costs"] = costs;
+
+      /*
+      * Section - Update the Savings
+      */
+      // Obtain the savings object
+      let savings = newJSON["savings"] || {};
+
+      // Update the savings for the specific item
+      savings[ID] = (savings[ID] || 0) + (price - parseFloat(discountedPrice));
+
+      // Re-assign the updated savings
+      newJSON["savings"] = savings;
+
+      /*
+      * Section - Update the Cookie
+      */
+      // Convert the updated cart object to a string
+      let myCartString = JSON.stringify(newJSON);
+
+      // Create a date object
+      let date = new Date();
+
+      // Set the expiry date of the cookie
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+      // Create the string for the expires in the JS Cookie
+      expires = "; path=/; expires=" + date.toUTCString();
+
+      // Set the cookie
+      document.cookie = "cart=" + myCartString + ';' + expires + ';';
+
+      // Log the cookie
+      console.log(myCartString);
+
+      // Alert the user and reload 
+      window.alert('Added item to cart');
+      window.location.reload();
+    
+    // The cookie does not exist
+    } else {
+      // Create an array of IDs
+      let IDs = [];
+
+      // Add the new ID into the array of IDs
+      IDs.push(ID);
+      
+      // Cart JSON Object
+      let myCart = {
+        // Total price - Set the new total as the initial price
+        total: parseFloat(discountedPrice),
+        // An array of IDs, 
+        ids: IDs,
+        // Qty is the quantity of each ID
+        qty: {
+          [ID]: 1, // Use the actual value of ID as the key
+        },
+        // Price is the Price of each ID
+        costs: {
+          [ID]: parseFloat(discountedPrice), // Use the actual value of ID as the key
+        },
+        // Savings is the savings for each ID
+        savings: {
+          [ID]: price - parseFloat(discountedPrice), // Use the actual value of ID as the key
+        }
+      }
+
+      // Convert the cart object to a string
+      let myCartString = JSON.stringify(myCart);
+      
+      // Create a Date Object
+      let date = new Date();
+
+      // Set the expiration date
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+      // Create the string for the expiration date
+      expires = "; path=/; expires=" + date.toUTCString();
+
+      // Create the cookie
+      document.cookie = "cart=" + myCartString + ';' + expires + ';';
+
+      // Log the cart cookie
+      console.log(myCartString);
+
+      // Alert the user
+      window.alert('Added item to cart');
+
+      // Reload the page
+      window.location.reload();
+    }
+  }
+
+  function yes(id) {
+    // Make a put request to /reviews/yes/:id
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`/reviews/yes/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      location.href() = location.href()
+      alert('Thank you for your feedback');
+    })
+  }
+
+  function no(id) {
+    // Make a put request to /reviews/no/:id
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(`/reviews/no/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+    }) 
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      
+      alert('Thank you for your feedback');
+    })
+  }
+</script>

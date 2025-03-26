@@ -1,0 +1,25 @@
+<div class="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+  <div class="sm:flex sm:items-center px-8 py-6">
+    <div class="text-center sm:text-left sm:flex-grow">
+      <div class="mb-6">
+        <h1 class="text-2xl leading-tight font-bold text-gray-900">
+          <%= @notification.subject %>
+        </h1>
+        <p class="text-lg leading-tight text-gray-700 mt-4">
+          <%= @notification.notif %>
+        </p>
+      </div>
+      <div class="flex items-center justify-between mt-6">
+        <div class="text-lg leading-tight text-gray-600">
+          <span class="font-semibold">Issued by:</span> <%= @notification.issuer %>
+        </div>
+        <div class="text-lg leading-tight text-gray-600">
+          <span class="font-semibold">Status:</span> <%= @notification.status ? 'Read' : 'Unread' %>
+        </div>
+      </div>
+      <div class="text-lg leading-tight text-gray-600 mt-4">
+        <span class="font-semibold">Date:</span> <%= @notification.created_at.strftime("%B %d, %Y %H:%M") %>
+      </div>
+    </div>
+  </div>
+</div>

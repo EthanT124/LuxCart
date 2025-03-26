@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  action: MyString
+  description: MyString
+  Occured: 2024-07-05 11:39:22
+  location: MyString
+
+two:
+  action: MyString
+  description: MyString
+  Occured: 2024-07-05 11:39:22
+  location: MyString

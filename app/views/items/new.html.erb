@@ -1,0 +1,141 @@
+<!-- app/views/items/_form.html.erb -->
+
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-4 text-center">Create your new item</h1>
+    <%= form_with model: @item, local: true, multipart: true do |form| %>
+      <div class="mb-4">
+        <%= form.label :title, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :title, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+        <% if @item.errors[:title].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:title].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <%= form.label :description, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_area :description, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+        <% if @item.errors[:description].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:description].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <%= form.label :cost, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.number_field :cost, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", step: "0.01" %>
+        <% if @item.errors[:cost].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:cost].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <%= form.label :sku, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :sku, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+        <% if @item.errors[:sku].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:sku].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <%= form.label :quantity, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.number_field :quantity, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+        <% if @item.errors[:quantity].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:quantity].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <%= form.label :category, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.text_field :category, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+        <% if @item.errors[:category].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:category].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <%= form.label :weight, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.number_field :weight, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", step: "0.01" %>
+        <% if @item.errors[:weight].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:weight].join(", ") %></p>
+        <% end %>
+      </div>
+    <div class="mb-4">
+      <%= form.label :published, class: "block text-gray-700 font-bold mb-2" %>
+      <div class="flex items-center">
+        <%= form.radio_button :published, 'true', class: "form-check-input" %>
+        <%= form.label :published, "Yes", class: "ml-2 text-gray-700" %>
+        <%= form.radio_button :published, 'false', class: "form-check-input ml-4" %>
+        <%= form.label :published, "No", class: "ml-2 text-gray-700" %>
+      </div>
+    </div>
+
+
+      <div class="mb-4">
+        <%= form.label :discount, class: "block text-gray-700 font-bold mb-2" %>
+        <%= form.number_field :discount, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", step: "0.01" %>
+        <% if @item.errors[:discount].any? %>
+          <p class="text-red-500 text-xs italic"><%= @item.errors[:discount].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mb-4">
+        <!-- app/views/items/_form.html.erb -->
+
+<%= form.label :rating, class: "block text-gray-700 font-bold mb-2" %>
+<%= form.number_field :rating, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", step: "0.01" %>
+<% if @item.errors[:rating].any? %>
+  <p class="text-red-500 text-xs italic"><%= @item.errors[:rating].join(", ") %></p>
+<% end %>
+</div>
+
+<div class="mb-4">
+  <%= form.label :images, class: "block text-gray-700 font-bold mb-2" %>
+  <%= form.file_field :images, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", multiple: true %>
+  <% if @item.errors[:images].any? %>
+    <p class="text-red-500 text-xs italic"><%= @item.errors[:images].join(", ") %></p>
+  <% end %>
+</div>
+
+<div class="mb-4">
+  <%= form.label :video, class: "block text-gray-700 font-bold mb-2" %>
+  <%= form.file_field :video, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" %>
+  <% if @item.errors[:video].any? %>
+    <p class="text-red-500 text-xs italic"><%= @item.errors[:video].join(", ") %></p>
+  <% end %>
+</div>
+
+<div class="mb-4" onclick="updateLog()">
+  <%= form.submit "Submit", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" %>
+</div>
+<% end %>
+
+
+<script>
+  const data = {
+    action: 'create new item',
+    description: 'Administrator created a new item',
+    Occured: new Date().toISOString(),
+    location: '/admin/new_item',
+    user: '<%=current_user.username%>'
+  }
+  function updateLog() {
+    const url = '/admin/activities/create'; // Replace with your actual route
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Log entry created:', data);
+    })
+    .catch(error => {
+      console.error('Error creating log entry:', error);
+    });
+  }
+</script>
+

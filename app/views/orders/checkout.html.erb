@@ -1,0 +1,772 @@
+<div id="Summary">
+  <!--This is my index for the cart, essentially showing all items -->
+  <div id="items">
+      <% if @items.empty? %>
+        
+      <% else %>
+<ol class="items-center flex w-full max-w-2xl text-center text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
+  <li class="flex items-center text-primary-700 after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
+    <span class="flex items-center after:mx-2 after:text-gray-200 after:content-['/'] dark:after:text-gray-500 sm:after:hidden">
+      <svg class="me-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+      Cart
+    </span>
+  </li>
+
+  <li class="flex items-center  after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
+    <span class="flex items-center after:mx-2 after:text-gray-200 after:content-['/'] dark:after:text-gray-500 sm:after:hidden">
+      <svg class="me-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+      Checkout
+    </span>
+  </li>
+
+  <li class="flex items-center ">
+    <svg class="me-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    Order summary
+  </li>
+</ol>
+      <section class="py-8 antialiased md:py-16">
+        <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+          <h2 class="text-xl font-semibold sm:text-2xl">Cart Summary</h2>
+          <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
+            <div class="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
+              <%@items.each do |item|%>
+                <div class="space-y-6">
+                  <div class="rounded-lg border border-gray-200 p-4 shadow-sm   md:p-6" id="<%=item.id%>">
+                    <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
+                      <a href="items/<%=item.id%>" class="shrink-0 md:order-1">
+                        <img class="h-20 w-20 " src="<%=item.paths[0]%>" alt="imac image" />
+                      </a>
+                      <div class="flex items-center justify-between md:order-3 md:justify-end">
+                        <div class="flex items-center">
+                          <button type="button" id="decrement-button" data-input-counter-decrement="counter-input" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border  bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600  dark:hover:bg-gray-600 dark:focus:ring-gray-700" onclick="decrement(<%=item.id%>)">
+                            <svg class="h-2.5 w-2.5 text-gray-900 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                            </svg>
+                          </button>
+                          <p style="display: none;">  <%=item_ID = item.id.to_s%></p>
+                          <%=@qty["item_ID"]%>
+                          <input type="text" id="counter-input<%=item.id%>" data-input-counter class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 " placeholder="" value="<%=@qty[item_ID]%>" onchange="handleQtyChange(<%=item.id%>)" required />
+                          <button type="button" id="increment-button" data-input-counter-increment="counter-input" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border  bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600  dark:hover:bg-gray-600 dark:focus:ring-gray-700" onclick="increment(<%=item.id%>)">
+                            <svg class="h-2.5 w-2.5 text-gray-900 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                            </svg>
+                          </button>
+                        </div>
+                        <div class="text-end md:order-4 md:w-32">
+                          <p class="text-base font-bold text-gray-900 " id="cost<%=item.id%>">$<%=item.cost * @qty[item_ID]%></p>
+                        </div>
+                      </div>
+                      <div class="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
+                        <a href="/shop/<%=item.id%>" class="text-base font-medium text-gray-900 hover:underline "><%=item.title%></a>
+                        <div class="flex items-center gap-4">
+                          <button type="button" class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500" onclick="remove(<%=item.id%>)">
+                            <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
+                            </svg>
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              <%end%>
+            </div>
+          </div>
+        <div class="mx-auto mt-6 max-w-4xl flex-1 space-y-6 lg:mt-0 lg:w-full">
+        <div class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm   sm:p-6">
+          <p class="text-xl font-semibold text-gray-900 ">Order Total</p>
+
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <dl class="flex items-center justify-between gap-4">
+                <dt class="text-base font-normal text-gray-500 ">Price Before Savings price</dt>
+                <dd class="text-base font-medium text-gray-900 " id="OG">$<%=@price_before_savings%></dd>
+              </dl>
+              <dl class="flex items-center justify-between gap-4">
+                <dt class="text-base font-normal text-green-500 ">Discount</dt>
+                <dd class="text-base font-medium text-green-500 " id="OG">$<%=@savings%></dd>
+              </dl>
+
+              <dl class="flex items-center justify-between gap-4">
+                <dt class="text-base font-normal text-gray-500 ">Tax</dt>
+                <dd class="text-base font-medium text-gray-900 " >$<%=@tax%></dd>
+              </dl>
+            </div>
+
+            <dl class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 ">
+              <dt class="text-base font-bold text-gray-900 ">Total</dt>
+              <dd class="text-base font-bold text-gray-900 ">$<%=@total%></dd>
+            </dl>
+          </div>
+          <%if current_user%>
+          <button class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onclick="nextStepPayment()">Payment Information</button>
+          <a href="/cart/checkout" class=""></a>
+
+          <div class="flex items-center justify-center gap-2">
+            <span class="text-sm font-normal text-gray-500 "> or </span>
+            <a href="/shop" title="" class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 underline hover:no-underline dark:text-primary-500">
+              Go Back To Shopping
+              <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4" />
+              </svg>
+            </a>
+            
+          </div>
+          <%else%>
+          <a href="/login" class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to Continue</a>
+          <%end%>
+          
+        </div>
+        </div>
+      </div>
+    </div>
+      </section>
+      <% end %>
+  </div>
+</div>
+<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-16 hidden" id="order">
+  <form action="/orders" method="post" class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+    <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+    <ol class="items-center flex w-full max-w-2xl text-center text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
+      <li class="after:border-1 flex items-center text-primary-700 after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
+        <span class="flex items-center after:mx-2 after:text-gray-200 after:content-['/'] dark:after:text-gray-500 sm:after:hidden">
+          <svg class="me-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          Cart
+        </span>
+      </li>
+
+      <li class="after:border-1 flex items-center text-primary-700 after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
+        <span class="flex items-center after:mx-2 after:text-gray-200 after:content-['/'] dark:after:text-gray-500 sm:after:hidden">
+          <svg class="me-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          Checkout
+        </span>
+      </li>
+
+      <li class="flex shrink-0 items-center">
+        <svg class="me-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        Order summary
+      </li>
+    </ol>
+    <div class="mt-6 sm:mt-8 lg:flex lg:items-start lg:gap-12 xl:gap-16">
+      <div class="min-w-0 flex-1 space-y-8">
+        <div class="space-y-4">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Personal Information</h2>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label for="first_name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">First Name*</label>
+              <input name="first_name" value="<%=@first_name%>" type="text" id="first_name" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="Alex" required />
+            </div>
+            <div>
+              <label for="last_name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Last Name*</label>
+              <input name="last_name" value="<%=@last_name%>" type="text" id="last_name" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="Fredrick" required />
+            </div>
+            <div>
+              <label for="your_email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"> Your email* </label>
+              <input name="email_address" value="<%=@email%>" type="email" id="your_email" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="example@mymail.com" required />
+            </div>
+            <div>
+              <label for="phone_number" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"> Your Phone Number* </label>
+              <input name="phone_number" value="<%=@phone_number%>" type="phone" id="phone_number" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="(306) 651-7984" required />
+            </div>
+            <div class="sm:col-span-2">
+              <button type="button" onclick="savePersonal()"class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700">
+                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5" />
+                </svg>
+                Save Personal Information
+              </button>
+            </div>
+          </div>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Shipping Information</h2>
+
+           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+           
+            <div>
+              <label for="address" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Address*</label>
+              <input name="address" type="address" id="address" value="<%=@address%>"class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" required />
+            </div>
+            <div>
+              <label for="billing_address" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Billing Address*</label>
+              <input name="billing_address" type="billing_address" value="<%=@billing%>" id="billing_address" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" required />
+            </div>
+            <div>
+              <label for="city" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">City*</label>
+              <input name="city" type="city" id="city" value="<%=@city%>" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="Saskatoon" required />
+            </div>
+            <div>
+              <label for="province" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Province*</label>
+              <input name="province" type="province" id="province" value="<%=@province%>" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="Saskatchewan" required />
+            </div>
+            <div>
+              <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country*</label>
+              <input name="country" type="country" id="country" value="<%=@country%>" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="Canada" required />
+            </div>
+            <div>
+              <label for="postal_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Postal Code*</label>
+              <input name="postal_code" type="postal_code" id="postal_code" value="<%=@postal%>" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" placeholder="S7H 0W6" required />
+            </div>
+
+
+            <div class="sm:col-span-2">
+              <button onclick="saveInfo()"class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700">
+                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5" />
+                </svg>
+                Save Address
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Payment Options</h3>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
+              <div class="flex items-start">
+                <div class="flex h-5 items-center">
+                  <input id="credit-card" name="payment_method" aria-describedby="credit-card-text" type="radio" name="payment-method" value="Credit Card" class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" checked />
+                </div>
+
+                <div class="ms-4 text-sm">
+                  <label for="credit-card" class="font-medium leading-none text-gray-900 dark:text-white"> Credit Card </label>
+                  <p id="credit-card-text" class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">Pay with your credit card</p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center gap-2">
+                <div class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"></div>
+
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
+              <div class="flex items-start">
+                <div class="flex h-5 items-center">
+                  <input id="pay-on-delivery" name="payment_method" aria-describedby="pay-on-delivery-text" type="radio" name="payment-method" value="Pay When Delivered" class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
+                </div>
+
+                <div class="ms-4 text-sm">
+                  <label for="pay-on-delivery" class="font-medium leading-none text-gray-900 dark:text-white"> Payment on delivery </label>
+                  <p id="pay-on-delivery-text" class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">Pay when Package Arrives</p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center gap-2">
+                <div class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"></div>
+
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
+              <div class="flex items-start">
+                <div class="flex h-5 items-center">
+                  <input id="paypal-2" aria-describedby="paypal-text" type="radio" name="payment_method" value="Paypal" class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
+                </div>
+
+                <div class="ms-4 text-sm">
+                  <label name="" for="paypal-2" class="font-medium leading-none text-gray-900 dark:text-white"> Paypal account </label>
+                  <p id="paypal-text" class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400" >Pay with your Paypal Account</p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center gap-2">
+
+                <div class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"></div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Delivery Methods</h3>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+<div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
+  <div class="flex items-start">
+    <div class="flex h-5 items-center">
+      <input name="shipping_method" id="dhl" aria-describedby="dhl-text" type="radio" data-cost="0" class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" checked />
+    </div>
+    <div class="ms-4 text-sm">
+      <label for="dhl" class="font-medium leading-none text-gray-900 dark:text-white"> Free Delivery - FedEx</label>
+    </div>
+  </div>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
+  <div class="flex items-start">
+    <div class="flex h-5 items-center">
+      <input name="shipping_method" id="fedex" aria-describedby="fedex-text" type="radio" data-cost="15" class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
+    </div>
+    <div class="ms-4 text-sm">
+      <label for="fedex" class="font-medium leading-none text-gray-900 dark:text-white"> $15 - Fast Delivery</label>
+    </div>
+  </div>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
+  <div class="flex items-start">
+    <div class="flex h-5 items-center">
+      <input name="shipping_method" id="express" aria-describedby="express-text" type="radio" data-cost="49" class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
+    </div>
+    <div class="ms-4 text-sm">
+      <label for="express" class="font-medium leading-none text-gray-900 dark:text-white"> $49 - Express Delivery </label>
+    </div>
+  </div>
+</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-6 w-full space-y-6 sm:mt-8 lg:mt-0 lg:max-w-xs xl:max-w-md">
+        <div class="flow-root">
+          <div class="-my-3 divide-y divide-gray-200 dark:divide-gray-800">
+            <dl class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Subtotal</dt>
+              <dd class="text-base font-medium text-gray-900 dark:text-white">$<%=@original%></dd>
+            </dl>
+
+            <dl class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Savings</dt>
+              <dd class="text-base font-medium text-green-500">$<%=@savings%></dd>
+              <input name="discount" type="text" value="0" class="hidden">
+            </dl>
+
+            <dl class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Tax</dt>
+              <dd class="text-base font-medium text-gray-900 dark:text-white">$<%=@tax%></dd>
+              <input name="tax" type="text" value="<%=@tax%>" class="hidden">
+            </dl>
+            <dl class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-base font-normal text-gray-500">Shipping</dt>
+              <dd class="text-base font-medium text-gray-900" id="shipping-cost">$<%= @shipping_cost || 0 %></dd>
+            </dl>
+
+            <dl class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-base font-bold text-gray-900 dark:text-white">Total</dt>
+              <dd class="text-base font-bold text-gray-900 dark:text-white" id="total-text">$<%=@total%></dd>
+              <input name="total" type="text" class="hidden" id="total-input" value="<%=@total%>">
+            </dl>
+          </div>
+        </div>
+        <div>
+            <label for="customer_notes" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Customer notes</label>
+            <input type="text-area" id="customer_notes" name="customer_notes" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"  required />
+        </div>
+        <input type="datetime" value="<%=DateTime.now%>" class="hidden" name="date_ordered">
+        <input type="datetime" value="<%=DateTime.now%>" class="hidden" name="created_at">
+        <input type="number" class="hidden" value="<%=@current_user.id%>" name="user_id">
+        <div class="space-y-3">
+          <button type="submit" class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Proceed to Payment</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>
+<h1 class="hidden" id="user"><%=@current_user.id%></h1>
+<script>
+
+    function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  /*
+  * Function for removing matching IDs when user presses the remove button
+  * id - the ID array
+  * idToFilterOut - The ID Passed In to filter out
+  */
+  function filterByID(id, idToFilterOut) {
+    // Return all values that don't match the ID
+    return id !== idToFilterOut;
+  }
+
+  /*
+  * The remove function 
+  * id - The ID to remove
+  */
+  function remove(id) {
+    // Parse the JSON of the cookie
+    let newJSON = JSON.parse(getCookie('cart'));  
+
+    // Obtain the array of IDs
+    let newIDS = newJSON["ids"];
+    let cost = newJSON['costs'];
+
+    // Filter out the ID of the current Item (remove it from the array)
+    newIDS = newIDS.filter(ID => filterByID(ID, id))
+
+    // Update the ID array in the original JSON cookie 
+    newJSON["ids"] = newIDS;
+    
+    // Update the total price
+    let total = newJSON["total"];
+
+    // Use the costs to subtract the value from total
+    let newTotal = total - cost[id + ''];
+
+    // Update the total to be the new total
+    newJSON["total"] = newTotal;
+
+    // Stringify the updated JSON object
+    let myCartString = JSON.stringify(newJSON);
+
+    // Basically, if there's nothing in the cart remove the Cookie
+    if (newIDS.length <= 0) {
+      // Remove the cookie 
+      document.cookie = "cart=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC"; 
+
+      // Reload the page
+      window.location.reload();
+    // Otherwise, Update the cookie
+    } else {
+      // Set the cookie with the updated cart JSON and expiration date
+      let date = new Date();
+
+      // Date expires in 7 days
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); 
+
+      // Create the expires string
+      let expires = "; expires=" + date.toUTCString();
+
+      // Create the new cookie
+      document.cookie = "cart=" + myCartString + expires + "; path=/";
+      
+      // Refresh the page
+      window.location.reload();
+    }
+  } 
+
+  /*
+  * Dynamic helper for updating cart quantity buttons and user change
+  */
+  function updateCart(ID, qtyPassedIn, status) {
+    console.log('The ID passed in is ' + ID);
+    console.log('The Quantity passed in is ' + qtyPassedIn);
+    console.log('The status of whether its an increment or decrement is ' + status);
+    
+    // Obtain the cookie
+    let newJSON = JSON.parse(getCookie('cart'));  
+
+    // Obtain the quantity section of the cookie
+    let qty = newJSON['qty'];
+
+    // Basically, if the quantity is 0, remove it
+    if (qtyPassedIn <= 0) {
+      // Call the remove function
+      remove(ID);
+
+      // Refresh the page
+      window.location.reload();
+    }
+
+    // Obtain the value of the costs
+    let cost = newJSON["costs"];
+      
+    // Update the total price
+    let total = newJSON["total"];
+    
+    
+    
+    // If it's Incrementing
+    if (status) {
+      let costOfItem = cost[ID + ''];
+
+    
+
+      let curqty = qty[ID + ''];
+      let qtyDif = qtyPassedIn - curqty;
+      curqty += qtyDif;
+      total += costOfItem * qtyDif;
+      console.log(qtyDif);
+      qty['' + ID] = curqty;
+      
+      newJSON['total'] = total;
+
+      newJSON['qty'] = qty;
+
+    } else if (!status) {
+      let costOfItem = cost[ID + ''];
+
+     
+
+      let curqty = qty[ID + ''];
+
+      let qtyDif = curqty - qtyPassedIn;
+      curqty -= qtyDif;
+      console.log('the current quantity is ' + curqty);
+      console.log('The quantity difference is ' + curqty + ' Minus ' + qtyPassedIn + ' To Equal ' + qtyDif)
+      total -= costOfItem * qtyDif;
+      console.log(qtyDif);
+      qty['' + ID] = curqty;
+      
+      newJSON['total'] = total;
+
+      newJSON['qty'] = qty;
+
+
+      if (curqty <= 0) {
+        remove(ID);
+      }
+
+    }
+
+    let myCartString = JSON.stringify(newJSON);
+
+    let date = new Date();
+
+    // Date expires in 7 days
+    date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); 
+
+    // Create the expires string
+    let expires = "; expires=" + date.toUTCString();
+
+    // Create the new cookie
+    document.cookie = "cart=" + myCartString + expires + "; path=/";
+
+    // Reload the page
+    window.location.reload();
+    
+  
+  }
+
+
+  /*]
+  * This is for decrementing the qty
+  */
+  function decrement(ID) {
+    let newJSON = JSON.parse(getCookie('cart'));  
+    
+    // Get the qty
+    let qty = newJSON['qty'];
+
+    // Update qty
+    let qtyValue = qty[ID + ''];
+    let oldQty = qtyValue;
+
+
+    // Decrement
+    qtyValue--;
+
+    // Update the cookie
+    updateCart(ID, qtyValue, false);  
+
+  }
+
+  /*
+  * Increment Quantities 
+  */
+  function increment(ID) {
+    let newJSON = JSON.parse(getCookie('cart'));  
+    
+    // Get the qty
+    let qty = newJSON['qty'];
+
+    // Update qty
+    let qtyValue = qty[ID + ""];
+    console.log('The old quantity is ' + qtyValue);
+    let oldQty = qtyValue;
+    
+    // Increment
+    qtyValue++;
+    console.log('the new quantity is ' + qtyValue);
+    // Update the cookie
+    updateCart(ID, qtyValue, true);
+  }
+
+  /*
+  * Onchange for qty
+  */
+  function handleQtyChange(ID) {
+    let stringtest = 'counter-input' + ID;
+    let qty = document.getElementById(stringtest).value;
+    let number = 0;
+    let newJSON = JSON.parse(getCookie('cart'));  
+
+    // Obtain the quantity section of the cookie
+    let qtys = newJSON['qty'];
+    let difference = qty - qtys[ID + ''];
+    // If it's a increment
+    if (difference >= 0) {
+      updateCart(ID, qty, true);
+    } else {
+      updateCart(ID, qty, false);
+    }
+    // If it's a decrement
+    
+    
+
+  }
+  function nextStepPayment() {
+    document.getElementById("Summary").classList.add("hidden");
+    document.getElementById("order").classList.remove("hidden");
+    console.log('this is just a test');
+  }
+
+  /*
+  Function for handling the put request for the payment information JSON.
+  */
+  function saveInfo() {
+      // Retrieve the CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      let shipping_details = {
+          // Initialize your shipping details object here
+      };
+
+      const address = document.getElementById('address').value;
+      const billing_address = document.getElementById('billing_address').value;
+      const city = document.getElementById('city').value;
+      const province = document.getElementById('province').value;
+      const postal_code = document.getElementById('postal_code').value; // Correct this
+      const country = document.getElementById('country').value; // Correct this
+
+      shipment = {
+          address: address,
+          billing: billing_address,
+          city: city,
+          province: province, 
+          postal: postal_code,
+          country: country,
+      };
+
+      console.log(shipping_details);
+      const value = document.getElementById('user').innerHTML;
+      console.log(value);
+
+      fetch('/users/' + value + '/update_shipping', {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken // Include the CSRF token here
+          },
+          body: JSON.stringify({
+              user: {
+                  shipping_details: shipment,
+              }
+          })
+      })
+      .then(response => {
+          if (!response.ok) {
+              return response.text().then(err => Promise.reject(err)); // Get text response for error
+          }
+          return response.json();
+      })
+      .then(data => {
+          console.log('Success: ', data);
+      })
+      .catch((error) => {
+          console.error('Error: ', error);
+      });
+  }
+
+ function savePersonal() {
+      // Retrieve the CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      const first_name = document.getElementById('first_name').value;
+      const last_name = document.getElementById('last_name').value;
+      const email = document.getElementById('your_email').value;
+      const phone = document.getElementById('phone_number').value;
+
+      const value = document.getElementById('user').innerHTML;
+
+      fetch('/users/' + value + '/update_personal', {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken 
+          },
+          body: JSON.stringify({
+              user: {
+                  first_name: first_name,
+                  last_name: last_name,
+                  phone: phone,
+                  email: email,
+              }
+          })
+      })
+      .then(response => {
+          if (!response.ok) {
+              return response.text().then(err => Promise.reject(err)); // Get text response for error
+          }
+          return response.json();
+      })
+      .then(data => {
+          console.log('Success: ', data);
+      })
+      .catch((error) => {
+          console.error('Error: ', error);
+      });
+  }
+</script>
+<script>
+  let shippingCost = parseFloat(document.getElementById('shipping-cost').innerText.replace('$', '')) || 0;
+
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  function updateTotalPrice() {
+    let newJSON = JSON.parse(getCookie('cart'));
+    let total = newJSON["total"];
+    total = Math.round(total * 100) / 100;
+
+    let finalTotal = total + shippingCost;
+    finalTotal = Math.round(finalTotal * 100) / 100;
+    document.getElementById('total-input').value = finalTotal
+    document.getElementById('total-text').innerText = '$' + finalTotal;
+    console.log('The total is ' + finalTotal);
+  }
+
+  document.querySelectorAll('input[name="shipping_method"]').forEach((input) => {
+    input.addEventListener('change', (event) => {
+      shippingCost = parseFloat(event.target.dataset.cost) || 0;
+      document.getElementById('shipping-cost').innerText = '$' + shippingCost.toFixed(2);
+      updateTotalPrice();
+    });
+  });
+
+  window.onload = function() {
+    updateTotalPrice();
+  };
+</script>

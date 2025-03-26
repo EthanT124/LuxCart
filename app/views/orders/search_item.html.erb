@@ -1,0 +1,111 @@
+
+<h1 class="text-4xl font-bold text-center mb-4">Search Your Order</h1>
+<div class="flex justify-center">
+    <input type="text" placeholder="search by order ID" id="order_search_input" class="border border-gray-300 rounded-lg p-2 mr-2">
+    <button type="button" onclick="findOrder(document.getElementById('order_search_input').value)" id="order_search_button" class="bg-blue-500 text-white rounded-lg p-2">Search for order</button>
+    <p class="hidden px-5 text-red-600 text-lg text-bold" id="invalid"> Order Not Found</p>
+</div>
+
+<div>
+    <div class="hidden" id="user_invalid">
+        <h1 class="text-red-600 text-xl text-center">You are not authorized to view this order</h1>
+    </div>
+    <div class="hidden" id="user_valid">
+        <h1 class="text-green-600 text-xl text-center"></h1>
+    </div>    
+    <!--Specify order details without inserting value-->
+    <div class="hidden flex justify-center mt-4" id="order">
+        <div class="w-1/3">
+            <div class="flex justify-between">
+                <p class="font-bold">Order ID:</p>
+                <p id="order_id"></p>
+            </div>
+            <div class="flex justify-between">
+                <p class="font-bold">Order Name</p>
+                <p id="order_name"></p>
+            </div>
+            <div class="flex justify-between">
+                <p class="font-bold">Date Ordered:</p>
+                <p id="order_date"></p>
+            </div>
+            <div class="flex justify-between">
+                <p class="font-bold">Delivery Date: </p>
+                <p id="delivery_date"></p>
+            </div>
+            <div class="flex justify-between">
+                <p class="font-bold">Status of delivery:</p>
+                <p id="order_status"></p>
+            </div>
+            <div class="flex justify-between">
+                <p class="font-bold">Order Items:</p>
+                <p id="order_items"></p>
+            </div>
+            <div class="flex justify-between">
+                <p class="font-bold">Total Price:</p>
+                <p id="order_total_price"></p>
+            </div>
+            <!--Make the view order details button redirect to proper url with no info provided yet for url-->
+            <div>
+                <a href="" id="url">
+                    <button class="bg-blue-500 text-white rounded-lg p-2 mt-4">View Order Details</button>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function findOrder(orderID) {
+    document.getElementById('order_id').innerText = '';
+    document.getElementById('order_name').innerText = '';
+    document.getElementById('order_date').innerText = '';
+    document.getElementById('delivery_date').innerText = '';
+    document.getElementById('order_status').innerText = '';
+    document.getElementById('order_items').innerText = '';
+    const orders = <%= @orders.to_json.html_safe %>;
+    const order = orders.find(order => order.id == orderID);    
+    if (!order) {
+        document.getElementById('invalid').classList.remove('hidden');
+        document.getElementById('order').classList.add('hidden');
+        document.getElementById('user_valid').classList.add('hidden');
+        document.getElementById('user_invalid').classList.add('hidden');
+    } else {
+        document.getElementById('invalid').classList.add('hidden');
+        document.getElementById('order').classList.remove('hidden');
+        document.getElementById('user_valid').classList.remove('hidden');
+        document.getElementById('user_invalid').classList.add('hidden');
+
+        document.getElementById('order_id').innerText = order.id;
+        document.getElementById('order_name').innerText = order.first_name + ' ' + order.last_name;
+        document.getElementById('order_date').innerText = order.date_ordered.split('T')[0];
+        if (order.delivery_date) {
+            document.getElementById('delivery_date').innerText = order.delivery_date.split('T')[0];
+        }
+       
+
+        if (order.order_status == 'delivered') {
+            document.getElementById('order_status').classList.add('text-green-600');
+            document.getElementById('order_status').innerText = order.order_status;
+        } else if (order.order_status == 'Cancelled') {
+            document.getElementById('order_status').classList.add('text-red-600');
+            document.getElementById('order_status').innerText = order.order_status;
+        } else if (order.order_status == null) {
+            document.getElementById('order_status').innerText = 'Not Available';
+        }
+        
+        // Get the total number of items
+        let total = 0;
+        for (item in order.items) {
+            total++;
+        }
+        if (order.delivery_date == null) {
+            document.getElementById('delivery_date').innerText = 'Not Available';
+        }
+        document.getElementById('order_items').innerText = total;
+        document.getElementById('order_total_price').innerText = '$' + order.total;
+        document.getElementById('url').href = `/orders/${order.id}`;
+    }
+    }
+</script>

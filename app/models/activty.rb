@@ -1,0 +1,2 @@
+class Activty < ApplicationRecord
+end

@@ -1,0 +1,314 @@
+<div class="py-4 gap-3">
+  <div class="flex items-center justify-end">
+    <div class="mr-4">
+      <%= form_tag '/shop', method: :post, id: 'categoryForm', class: 'w-full' do %>
+        <h1 class="py-2 px-3">Sort By Category</h1>
+        <select name="category" class="text-right w-100% p-2 text-sm border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onchange="submitForm()">
+          <option selected="selected">Select an Option</option>
+          <option value="reset">Reset</option>
+          <% @categories.each do |category| %>
+            <option value="<%= category %>"><%= category %></option>
+          <% end %>
+        </select>
+      <% end %>
+    </div>
+    <div class="mr-4 hidden">
+      <%= form_tag '/shop', method: :post, id: 'sortPriceForm', class: 'w-full' do %>
+        <h1 class="py-2 px-3">Sort by Price</h1>
+        <select name="sort_price" class="text-right w-100% p-2 text-sm border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onchange="submitForm()">
+          <option selected="selected">Select an Option</option>
+          <option value="lowest_price">Lowest Price</option>
+          <option value="highest_price">Highest Price</option>
+          <option value="lowest_discounted_price">Lowest Discounted Price</option>
+          <option value="highest_discounted_price">Highest Discounted Price</option>
+        </select>
+      <% end %>
+    </div>
+    <div class="hidden">
+      <%= form_tag '/shop', method: :post, id: 'sortReviewForm', class: 'w-full' do %>
+        <h1 class="py-2 px-3">Sort by Review</h1>
+        <select name="sort_review" class="text-right w-100% p-2 text-sm border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onchange="submitForm()">
+          <option selected="selected">Select an Option</option>
+          <option value="highest_reviewed">Highest Reviewed</option>
+          <option value="lowest_reviewed">Lowest Reviewed</option>
+        </select>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Now, display each item -->
+<div class="grid grid-cols-4 gap-4 px-4 justify-center">
+  <!-- Loop through each item -->
+  <% @items.each do |item| %>
+    <!-- Check to make sure that each item is published -->
+    <% if item.published %>
+    <div id="<%= item.id %>" data-category="<%= item.category %>" class="flex flex-col m-4 rounded-lg shadow">
+      <a href="/shop/<%= item.id %>" class="flex flex-col flex-grow justify-between">
+        <div class="px-3 py-3">
+          <h1 class="text-lg font-semibold py-3 px-2 text-center" id="title<%= item.id %>"><%= item.title %></h1>
+          <div class="flex justify-center items-center">
+            <% if item.paths.present? %>
+              <%= image_tag item.paths[0], class: 'w-48 h-48 object-cover mb-4 py-3' %>
+            <% end %>
+          </div>
+          
+          <div class="text-center py-3">
+            <% if item.discount > 0 %>
+              <p class="text-2xl font-bold text-red-500">
+                $<%= (item.cost * (1 - item.discount / 100.0)).round(2) %>
+                <span class="text-sm text-red-500">(<%= item.discount %>% off)</span>
+              </p>
+              <p class="text-lg text-gray-500 line-through">$<%= item.cost %></p>
+            <% else %>
+              <p class="text-2xl font-bold">$<%= item.cost %></p>
+            <% end %>
+          </div>
+          <div id="review" class="text-center">
+            <div class="flex flex-col items-center justify-center gap-y-1">
+              <div class="flex items-center gap-x-1">
+                <% (1..5).each do |i| %>
+                  <svg class="w-5 h-5 <%= i <= item.average_rating ? 'text-yellow-400' : 'text-gray-300' %>"
+                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                  </svg>
+                <% end %>
+              </div>
+              <span class="text-gray-700 dark:text-gray-300">(<%= item.average_rating %>)</span>
+              <a href="/shop/<%= item.id %>#reviews" class="text-sm text-gray-600 hover:underline"><%= item.total_reviews %> reviews</a>
+            </div>
+          </div>
+
+          <p class="text-lg text-center"><%= item.description %></p>
+
+        </div>
+      </a>
+      <div class="flex justify-center py-2">
+        <button class="bg-blue-800 text-white w-30 h-15 text-center rounded-lg py-1 px-3 shadow hover:bg-blue-500" onclick="cart(<%= item.cost %>, '<%= item.title %>', '<%= item.description %>', <%= item.id %>, <%= item.discount %>)">Add to Cart</button>
+      </div>
+    </div>
+    <% end %>
+  <% end %>
+</div>
+<div class="text-center py-5">
+  <%== pagy_nav(@pagy) %>
+</div>
+
+<script>
+  /*
+  * Handling the submission for when the category is selected
+  */
+  function submitForm() {
+    // Get the form
+    var form = document.getElementById('categoryForm');
+
+    // Submit the form
+    form.submit();
+  }
+
+  /*
+  * Function for getting the cookie name
+  * cname - The name of the cookie
+  */
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  /*
+  * This is my function for handling my cart
+  * price - the price of the current item
+  * name - the name of the current item
+  * description - the desc of the current item
+  * ID - The ID of the current item
+  * discount - The discount of the current item
+  */
+  function cart(price, name, description, ID, discount) {
+    // Calculate the discounted price
+    let discountedPrice = discount > 0 ? (price * (1 - discount / 100.0)).toFixed(2) : price;
+
+    // If the cart item exists
+    if (getCookie('cart') != "") {
+      
+      // Get the cookie information
+      let cookieValue = getCookie('cart');
+
+      // Parse the JSON of the cookie
+      let newJSON = JSON.parse(cookieValue);  
+
+      /*
+      * Section - ID Filtration and Addition
+      */
+      // Obtain the array of IDs
+      let newIDS = newJSON["ids"];
+
+      // Add the new ID of the current Item
+      newIDS.push(ID);
+
+      // Update the ID array in the original JSON cookie 
+      newJSON["ids"] = newIDS;
+
+      /*
+      * Section - Updating the Total Price
+      */
+      // Obtain the total
+      let newTotal = newJSON["total"];
+
+      // Add the price to the total
+      newTotal += parseFloat(discountedPrice);
+
+      // Re-assign the total to the JSON Object
+      newJSON["total"] = newTotal;
+
+      /*
+      * Section - Update the Quantity
+      */ 
+      // Get all quantity values
+      let qty = newJSON["qty"];
+      
+      // Dynamically update or add the quantity for the item
+      if (!qty[ID]) {
+        qty[ID] = 1; // Initialize quantity to 1 if the item is not already in the cart
+      } else {
+        qty[ID]++; // Increment the quantity if the item is already in the cart
+      }
+
+      /*
+      * Section - Update the Individual Price
+      */
+      // Obtain the costs object
+      let costs = newJSON["costs"];
+
+      // Update the price for the specific item
+      costs[ID] = (costs[ID] || 0) + parseFloat(discountedPrice);
+
+      // Re-assign the updated qty and costs
+      newJSON["qty"] = qty;
+      newJSON["costs"] = costs;
+
+      /*
+      * Section - Update the Savings
+      */
+      // Obtain the savings object
+      let savings = newJSON["savings"] || {};
+
+      // Update the savings for the specific item
+      savings[ID] = (savings[ID] || 0) + (price - parseFloat(discountedPrice));
+
+      // Re-assign the updated savings
+      newJSON["savings"] = savings;
+
+      /*
+      * Section - Update the Cookie
+      */
+      // Convert the updated cart object to a string
+      let myCartString = JSON.stringify(newJSON);
+
+      // Create a date object
+      let date = new Date();
+
+      // Set the expiry date of the cookie
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+      // Create the string for the expires in the JS Cookie
+      expires = "; expires=" + date.toUTCString();
+
+      // Set the cookie
+      document.cookie = "cart=" + myCartString + ';' + expires + ';';
+
+      // Log the cookie
+      console.log(myCartString);
+
+      // Alert the user and reload 
+      window.alert('Added item to cart');
+      window.location.reload();
+    
+    // The cookie does not exist
+    } else {
+      // Create an array of IDs
+      let IDs = [];
+
+      // Add the new ID into the array of IDs
+      IDs.push(ID);
+      
+      // Cart JSON Object
+      let myCart = {
+        // Total price - Set the new total as the initial price
+        total: parseFloat(discountedPrice),
+        // An array of IDs, 
+        ids: IDs,
+        // Qty is the quantity of each ID
+        qty: {
+          [ID]: 1, // Use the actual value of ID as the key
+        },
+        // Price is the Price of each ID
+        costs: {
+          [ID]: parseFloat(discountedPrice), // Use the actual value of ID as the key
+        },
+        // Savings is the savings for each ID
+        savings: {
+          [ID]: price - parseFloat(discountedPrice), // Use the actual value of ID as the key
+        }
+      }
+
+      // Convert the cart object to a string
+      let myCartString = JSON.stringify(myCart);
+      
+      // Create a Date Object
+      let date = new Date();
+
+      // Set the expiration date
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+      // Create the string for the expiration date
+      expires = "; expires=" + date.toUTCString();
+
+      // Create the cookie
+      document.cookie = "cart=" + myCartString + ';' + expires + ';';
+
+      // Log the cart cookie
+      console.log(myCartString);
+
+      // Alert the user
+      window.alert('Added item to cart');
+
+      // Reload the page
+      window.location.reload();
+    }
+  }
+</script>
+<style>
+    .pagy-nav .page {
+      padding: 12px 24px; /* Increase button size */
+      font-size: 1.125rem; /* Font size (lg equivalent) */
+      border-radius: 0.5rem; /* Rounded corners */
+  }
+
+  .pagy-nav .page:hover {
+      background-color: #e2e8f0; /* Light gray for hover */
+  }
+
+  .pagy-nav .active {
+      background-color: #3182ce; /* Tailwind blue */
+      color: white;
+  }
+
+  .line-through {
+      text-decoration: line-through;
+      text-decoration-color: black;
+      text-decoration-thickness: 2px;
+      text-decoration-style: solid;
+  }
+
+</style>
